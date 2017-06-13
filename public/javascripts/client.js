@@ -67,9 +67,10 @@ jQuery(function($){
 
         bindEvents: function () {
             App.$doc.on('click', '#btnCreateGame', App.Host.onCreateClick);
+            App.$doc.on('click', '#btnStartGame', App.Host.onHostStartClick);
 
             App.$doc.on('click', '#btnJoinGame', App.Player.onJoinClick);
-            App.$doc.on('click', '#btnStart', App.Player.onPlayerStartClick);
+            App.$doc.on('click', '#btnStartJoinGame', App.Player.onPlayerStartClick);
         },
 
         showInitScreen: function() {
@@ -92,6 +93,11 @@ jQuery(function($){
             onCreateClick: function () {
                 console.log('Clicked "Créer une partie"');
                 IO.socket.emit('hostCreateNewGame');
+            },
+
+            onHostStartClick: function () {
+                console.log('Clicked "Commencer la partie"');
+
             },
 
             /* Initialisation de la partie */
@@ -119,10 +125,6 @@ jQuery(function($){
                 if (App.Host.isNewGame) {
                     App.Host.displayNewGameScreen();
                 }
-                // Update host screen
-                $('#playersWaiting')
-                    .append('<p/>')
-                    .text(data.playerName + ' a rejoint la partie.');
 
                 // Store the new player's data on the Host.
                 App.Host.players.push(data);
@@ -130,12 +132,22 @@ jQuery(function($){
                 // Increment the number of players in the room
                 App.Host.numPlayersInRoom += 1;
 
-                // If two players have joined, start the game!
-                if (App.Host.numPlayersInRoom === 2) {
-                    console.log('Room is full. Almost ready!');
+                console.log(App.Host.players);
 
-                    // Let the server know that two players are present.
-                    IO.socket.emit('hostRoomFull', App.gameId);
+                $('#playersWaiting').empty();
+                for (var player in App.Host.players) {
+                    var playerName = App.Host.players[player].playerName;
+                    $('#playersWaiting').append('<p>' + playerName + '</p>');
+                }
+
+                // If two players have joined, start the game!
+                if (App.Host.numPlayersInRoom >= 2) {
+                    console.log('Room is ready to start');
+
+                    $('#playersStart').empty();
+                    $('#playersStart').append('<button id="btnStartGame">Commencer la partie</button>');
+
+                    // IO.socket.emit('hostRoomFull', App.gameId);
                 }
             },
         },
@@ -163,12 +175,22 @@ jQuery(function($){
                     playerName : $('#inputPlayerName').val() || 'anon'
                 };
 
-                console.log(data);
 
                 IO.socket.emit('playerJoinGame', data);
 
                 App.myRole = 'Player';
                 App.Player.myName = data.playerName;
+            },
+
+            updateWaitingScreen : function(data) {
+                if (IO.socket.io.engine.id === data.mySocketId){
+                    App.myRole = 'Player';
+                    App.gameId = data.gameId;
+
+                    $('#playerWaitingMessage')
+                        .append('<p/>')
+                        .text('Joined Game ' + data.gameId + '. Please wait for game to begin.');
+                }
             },
         }
     };

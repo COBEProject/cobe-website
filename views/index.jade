@@ -1,0 +1,43 @@
+extends layout
+
+block header_banner
+    section#banner
+
+block header_intro
+    section#intro.container
+        .row
+          .4u(class='12u(mobile)')
+            section.first
+              i.icon.featured.fa-mobile
+              header
+                h2 Application mobile
+              p
+                | Chacun joue avec son téléphone. Rejoins une partie, saisi le code-cobe et amuses-toi.
+          .4u(class='12u(mobile)')
+            section.middle
+              i.icon.featured.alt.fa-flash
+              header
+                h2 Soirées électriques
+              p
+                | Avec l'abonnement, règles le niveau de difficulté pour plus de fun.
+          .4u(class='12u(mobile)')
+            section.last
+              i.icon.featured.alt2.fa-star
+              header
+                h2 Jeu de société
+              p
+                | Commande ton objet COBE et joue avec tes amis n'importe où.
+        footer
+          ul.actions
+            li
+              a.button.big(href='/play') Jouer
+            li
+              a.button.alt.big(href='#') Plus d'informations
+
+//  header
+//    h2 CoBE
+//    p Le jeu connecté de vos soirées
+
+//block content
+//  h1= title
+//  p Welcome to #{title}

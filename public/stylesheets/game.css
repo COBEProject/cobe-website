@@ -1,0 +1,49 @@
+#game-area {
+
+}
+    #game-area #intro-screen {
+        text-align: center;
+    }
+
+        #game-area #intro-screen .title {
+
+        }
+
+        #game-area #intro-screen #btnCreateGame {
+            margin: 50px;
+        }
+
+        #game-area #intro-screen #btnJoinGame {
+            margin: 50px;
+        }
+
+    #game-area #new-game {
+        text-align: center;
+    }
+
+        #game-area #new-game .infoBig {
+            font-size:36px;
+        }
+
+        #game-area #new-game .info {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+
+        #game-area #new-game #spanNewGameCode {
+            font-size: 5em;
+            margin: 100px 0;
+        }
+
+    #game-area #join-game {
+        text-align: center;
+    }
+
+        #game-area #join-game .info{
+            margin:20px;
+        }
+
+            #game-area #join-game .info label{
+                font-size: 1.5em;
+                margin: 10px 0;
+            }

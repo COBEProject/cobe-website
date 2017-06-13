@@ -54,7 +54,6 @@ app.use(function(err, req, res, next) {
 /* ######################## */
 
 io.sockets.on('connection', function (socket) {
-    console.log('client connected');
     game.init(io, socket);
 });
 

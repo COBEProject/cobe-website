@@ -35,8 +35,12 @@
             margin: 100px 0;
         }
 
+        #game-area #new-game #playersWaiting {
+            margin:25px 0;
+        }
+
         #game-area #new-game #playersWaiting p {
-            margin: 20px 5px;
+            margin: 5px;
             padding: 10px 50px;
             font-size: 1.5em;
             background: rgb(93, 93, 93);
@@ -46,7 +50,7 @@
         }
 
         #game-area #new-game #playersStart {
-            margin-top: 100px;
+            /*margin-top: 100px;*/
         }
 
     #game-area #join-game {
@@ -61,3 +65,14 @@
                 font-size: 1.5em;
                 margin: 10px 0;
             }
+
+    #game-area #host-game {
+        text-align: center;
+    }
+
+        #game-area #host-game #countDown {
+            font-size: 10em;
+            font-weight: bolder;
+            margin: 50px 0;
+        }
+

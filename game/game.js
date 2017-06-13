@@ -15,6 +15,7 @@ exports.init = function(sIo, sSocket) {
     socket.emit('connected', {'message': 'You are connected.'});
 
     socket.on('hostCreateNewGame', hostCreateNewGame);
+    socket.on('hostStartGame', hostPrepareGame);
 
     socket.on('playerJoinGame', playerJoinGame);
 };
@@ -32,6 +33,15 @@ function hostCreateNewGame() {
 
     // Join the Room and wait for the players
     this.join(thisGameId.toString());
+}
+
+function hostPrepareGame(gameId) {
+    var data = {
+        mySocketId : this.id,
+        gameId : gameId
+    };
+    console.log(data);
+    io.sockets.in(data.gameId).emit('beginNewGame', data);
 }
 
 /* ################################ */

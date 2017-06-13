@@ -17,6 +17,7 @@ jQuery(function($){
 
             IO.socket.on('newGameCreated', IO.onNewGameCreated );
             IO.socket.on('playerJoinedRoom', IO.playerJoinedRoom );
+            IO.socket.on('beginNewGame', IO.beginNewGame );
 
             IO.socket.on('appError', IO.error );
 
@@ -33,6 +34,11 @@ jQuery(function($){
 
         playerJoinedRoom : function(data) {
             App[App.myRole].updateWaitingScreen(data);
+        },
+
+        beginNewGame : function(data) {
+            console.log(App.myRole);
+            App[App.myRole].gameCountdown(data);
         },
 
         error : function(data) {
@@ -62,6 +68,7 @@ jQuery(function($){
             App.$templateIntroScreen    = $('#intro-screen-template').html();
             App.$templateNewGame        = $('#new-game-template').html();
             App.$templateJoinGame       = $('#join-game-template').html();
+            App.$templateHostGame       = $('#host-game-template').html();
 
         },
 
@@ -97,7 +104,7 @@ jQuery(function($){
 
             onHostStartClick: function () {
                 console.log('Clicked "Commencer la partie"');
-
+                IO.socket.emit('hostStartGame', App.gameId);
             },
 
             /* Initialisation de la partie */
@@ -150,6 +157,30 @@ jQuery(function($){
                     // IO.socket.emit('hostRoomFull', App.gameId);
                 }
             },
+
+            gameCountdown : function() {
+
+                App.$gameArea.html(App.$templateHostGame);
+
+                // Begin the on-screen countdown timer
+                var $secondsLeft = $('#countDown');
+                App.countDown($secondsLeft, 5, function(){
+                    IO.socket.emit('hostCountdownFinished', App.gameId);
+                });
+
+                // Display the players' names on screen
+                $('#player1Score')
+                    .find('.playerName')
+                    .html(App.Host.players[0].playerName);
+
+                $('#player2Score')
+                    .find('.playerName')
+                    .html(App.Host.players[1].playerName);
+
+                // Set the Score section on screen to 0 for each player.
+                $('#player1Score').find('.score').attr('id',App.Host.players[0].mySocketId);
+                $('#player2Score').find('.score').attr('id',App.Host.players[1].mySocketId);
+            },
         },
 
         /* ################################ */
@@ -192,7 +223,37 @@ jQuery(function($){
                         .text('Joined Game ' + data.gameId + '. Please wait for game to begin.');
                 }
             },
-        }
+
+            gameCountdown : function(hostData) {
+                App.Player.hostSocketId = hostData.mySocketId;
+                $('#gameArea')
+                    .html('<div class="gameOver">Soyez prêt</div>');
+            },
+        },
+
+        /* ################################ */
+        /* ###        UTILITY CODE      ### */
+        /* ################################ */
+
+        countDown : function($el, startTime, callback) {
+
+            // Display the starting time on the screen.
+            $el.text(startTime);
+
+            var timer = setInterval(countItDown, 1000);
+
+            function countItDown() {
+                startTime -= 1
+                $el.text(startTime);
+
+                if( startTime <= 0 ){
+                    clearInterval(timer);
+                    callback();
+                    return;
+                }
+            }
+
+        },
     };
 
     IO.init();

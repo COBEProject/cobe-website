@@ -45,7 +45,14 @@ function hostPrepareGame(gameId) {
         gameId : gameId
     };
 
-    io.sockets.in(data.gameId).emit('beginNewGame', data);
+    var request = require('request');
+    request('https://cobe-api.cfapps.io/questions', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            questions = JSON.parse(body);
+            io.sockets.in(data.gameId).emit('beginNewGame', data);
+        }
+    })
+
 }
 
 function hostStartGame(gameId) {
@@ -95,37 +102,19 @@ function sendQuestions(numQuestion, gameId) {
     io.sockets.in(gameId).emit('newQuestionData', data);
 }
 
-function getQuestionData(numQuestion){
+function getQuestionData(numQuestion) {
 
     console.log(questions);
+    console.log(questions[numQuestion]);
 
     var question = {
         numQuestion : numQuestion,
         question : questions[numQuestion].question,
-        answers : questions[numQuestion].reponses,
-        correctAnswer : questions[numQuestion].reponse
+        answers : questions[numQuestion].responses,
+        correctAnswer : questions[numQuestion].correctResponse
     };
 
     return question;
 }
 
-var questions = [
-    {
-        "question" : "De quel couleur est le cheval blanc d'Henri IV ?",
-        "reponses" : {
-            "A" : "Beige",
-            "B" : "Brun",
-            "C" : "Blanc",
-            "D" : "Noir"
-        },
-        "reponse" : "C"
-    },
-    {
-        "question" : "En quelle année sommes-nous ?",
-        "reponses" : {
-            "A" : "2016",
-            "B" : "2017"
-        },
-        "reponse" : "B"
-    }
-];
+var questions = [];

@@ -27,7 +27,6 @@ jQuery(function($){
         },
 
         onConnected : function(data) {
-            console.log(data.message);
             App.mySocketId = IO.socket.io.engine.id;
         },
 
@@ -128,12 +127,10 @@ jQuery(function($){
             currentQuestionNbPlayersAnswered: 0,
 
             onCreateClick: function () {
-                console.log('Clicked "Créer une partie"');
                 IO.socket.emit('hostCreateNewGame');
             },
 
             onHostStartClick: function () {
-                console.log('Clicked "Commencer la partie"');
                 IO.socket.emit('hostStartGame', App.gameId);
             },
 
@@ -145,8 +142,6 @@ jQuery(function($){
                 App.Host.numPlayersInRoom   = 0;
 
                 App.Host.displayNewGameScreen();
-
-                console.log("Game started with ID: " + App.gameId + ' by host: ' + App.mySocketId);
             },
 
             displayNewGameScreen : function() {
@@ -209,8 +204,6 @@ jQuery(function($){
 
                 App.currentQuestion             = data.numQuestion;
                 App.Host.currentCorrectAnswer   = data.correctAnswer;
-
-                console.log(App.currentQuestion);
             },
 
             checkAnswer : function(data) {
@@ -296,8 +289,6 @@ jQuery(function($){
                     answer: answer,
                     currentQuestion: App.currentQuestion
                 };
-
-                console.log(data);
 
                 IO.socket.emit('playerAnswer',data);
             },

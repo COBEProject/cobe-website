@@ -48,7 +48,7 @@ function hostPrepareGame(gameId) {
     var request = require('request');
     request('https://cobe-api.cfapps.io/questions', function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            questions = JSON.parse(body);
+            questions = shuffle(JSON.parse(body));
             io.sockets.in(data.gameId).emit('beginNewGame', data);
         }
     })
@@ -60,7 +60,7 @@ function hostStartGame(gameId) {
 };
 
 function hostNextQuestion(data) {
-    if (data.numQuestion < 5){
+    if (data.numQuestion < 10){
         sendQuestions(data.numQuestion, data.gameId);
     } else {
         io.sockets.in(data.gameId).emit('endGame',data);
@@ -104,9 +104,6 @@ function sendQuestions(numQuestion, gameId) {
 
 function getQuestionData(numQuestion) {
 
-    console.log(questions);
-    console.log(questions[numQuestion]);
-
     var question = {
         numQuestion : numQuestion,
         question : questions[numQuestion].question,
@@ -115,6 +112,25 @@ function getQuestionData(numQuestion) {
     };
 
     return question;
+}
+
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
 }
 
 var questions = [];

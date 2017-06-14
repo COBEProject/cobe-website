@@ -81,7 +81,7 @@
             color: white;
             padding: 15px;
             font-weight: bold;
-            margin: 50px;
+            margin: 15px;
         }
 
         #game-area #host-game .playerName {
@@ -115,6 +115,10 @@
         #game-area #ulAnswers li .btnAnswer {
             margin: 10px;
         }
+
+.help-question {
+    text-align: center;
+}
 
 .gameOver {
     font-size: 3em;

@@ -204,6 +204,7 @@ jQuery(function($){
 
                 App.currentQuestion             = data.numQuestion;
                 App.Host.currentCorrectAnswer   = data.correctAnswer;
+                App.Host.currentQuestionNbPlayersAnswered = 0;
             },
 
             checkAnswer : function(data) {
@@ -218,6 +219,9 @@ jQuery(function($){
                     if( App.Host.currentCorrectAnswer === data.answer ) {
                         $pScore.text( +$pScore.text() + 5 );
                     }
+
+                    // console.log();
+                    // console.log(App.Host.numPlayersInRoom);
 
                     if (App.Host.currentQuestionNbPlayersAnswered === App.Host.numPlayersInRoom) {
 
@@ -242,7 +246,7 @@ jQuery(function($){
 
                 // Display the winner (or tie game message)
 
-                $('hostQuestion').text('Partie terminée');
+                $('#hostQuestion').text('Partie terminée');
 
                 // Reset game data
                 App.Host.currentQuestionNbPlayersAnswered = 0;
@@ -330,6 +334,8 @@ jQuery(function($){
 
                 // Insert the list onto the screen.
                 $('#game-area').html($list);
+                $('#game-area').append('<div class="help-question">' + data.question + '</div>');
+
             },
 
             hideAnswer : function(data) {
@@ -341,13 +347,7 @@ jQuery(function($){
             endGame : function() {
                 $('#game-area')
                     .html('<div class="gameOver">Partie terminée</div>')
-                    .append(
-                        // Create a button to start a new game.
-                        $('<button>Start Again</button>')
-                            .attr('id','btnPlayerRestart')
-                            .addClass('btn')
-                            .addClass('btnGameOver')
-                    );
+                ;
             }
         },
 

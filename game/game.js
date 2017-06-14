@@ -16,8 +16,12 @@ exports.init = function(sIo, sSocket) {
 
     socket.on('hostCreateNewGame', hostCreateNewGame);
     socket.on('hostStartGame', hostPrepareGame);
+    socket.on('hostCountdownFinished', hostStartGame);
+    socket.on('hostNextQuestion', hostNextQuestion);
+
 
     socket.on('playerJoinGame', playerJoinGame);
+    socket.on('playerAnswer', playerAnswer);
 };
 
 /* ################################ */
@@ -40,8 +44,20 @@ function hostPrepareGame(gameId) {
         mySocketId : this.id,
         gameId : gameId
     };
-    console.log(data);
+
     io.sockets.in(data.gameId).emit('beginNewGame', data);
+}
+
+function hostStartGame(gameId) {
+    sendQuestions(0, gameId);
+};
+
+function hostNextQuestion(data) {
+    if (data.numQuestion < 5){
+        sendQuestions(data.numQuestion, data.gameId);
+    } else {
+        io.sockets.in(data.gameId).emit('endGame',data);
+    }
 }
 
 /* ################################ */
@@ -49,13 +65,8 @@ function hostPrepareGame(gameId) {
 /* ################################ */
 
 function playerJoinGame(data) {
-
-    console.log('Player ' + data.playerName + 'attempting to join game: ' + data.gameId );
-
     // Look up the room ID in the Socket.IO manager object.
     var room = socket.adapter.rooms[data.gameId];
-
-    console.log(socket.adapter.rooms[data.gameId]);
 
     // If the room exists...
     if( room != undefined ){
@@ -64,11 +75,57 @@ function playerJoinGame(data) {
 
         this.join(data.gameId);
 
-        console.log('Player ' + data.playerName + ' joining game: ' + data.gameId );
-
         io.sockets.in(data.gameId).emit('playerJoinedRoom', data);
 
     } else {
         this.emit('appError',{message: "Cette partie n'existe pas."} );
     }
 }
+
+function playerAnswer(data) {
+    io.sockets.in(data.gameId).emit('hostCheckAnswer', data);
+}
+
+/* ################################ */
+/* ###        GAME LOGIC        ### */
+/* ################################ */
+
+function sendQuestions(numQuestion, gameId) {
+    var data = getQuestionData(numQuestion);
+    io.sockets.in(gameId).emit('newQuestionData', data);
+}
+
+function getQuestionData(numQuestion){
+
+    console.log(questions);
+
+    var question = {
+        numQuestion : numQuestion,
+        question : questions[numQuestion].question,
+        answers : questions[numQuestion].reponses,
+        correctAnswer : questions[numQuestion].reponse
+    };
+
+    return question;
+}
+
+var questions = [
+    {
+        "question" : "De quel couleur est le cheval blanc d'Henri IV ?",
+        "reponses" : {
+            "A" : "Beige",
+            "B" : "Brun",
+            "C" : "Blanc",
+            "D" : "Noir"
+        },
+        "reponse" : "C"
+    },
+    {
+        "question" : "En quelle année sommes-nous ?",
+        "reponses" : {
+            "A" : "2016",
+            "B" : "2017"
+        },
+        "reponse" : "B"
+    }
+];

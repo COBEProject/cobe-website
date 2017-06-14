@@ -76,3 +76,49 @@
             margin: 50px 0;
         }
 
+        #game-area #host-game .score {
+            background: #c52349;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            margin: 50px;
+        }
+
+        #game-area #host-game .playerName {
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        #game-area #host-game .playerScore {
+            padding: 20px;
+        }
+
+        #game-area #host-game #playerScores {
+            text-align: right;
+        }
+
+        #game-area #host-game #hostQuestion {
+            font-size: 3em;
+            line-height: 1em;
+            margin: 50px 0;
+        }
+
+
+#game-area #ulAnswers {
+    text-align: center;
+}
+
+    #game-area #ulAnswers li {
+        display: inline-block;
+    }
+
+        #game-area #ulAnswers li .btnAnswer {
+            margin: 10px;
+        }
+
+.gameOver {
+    font-size: 3em;
+    font-weight: bold;
+    text-align: center;
+    margin: 50px 0;
+}

@@ -146,7 +146,15 @@ function playerAnswer(data) {
 /* ################################ */
 
 function sendQuestion(numQuestion, gameId) {
+
+    console.log("sendQuestion");
+    console.log("numQuestion", numQuestion);
+    console.log("gameId", gameId);
+
     var data = getQuestionData(numQuestion);
+    console.log("data", data);
+    console.log("fin sendQuestion");
+
     io.sockets.in(gameId).emit('newQuestionData', data);
 }
 

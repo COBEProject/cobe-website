@@ -18,6 +18,7 @@ exports.init = function(sIo, sSocket) {
     socket.on('hostStartGame', hostPrepareGame);
     socket.on('hostCountdownFinished', hostStartGame);
     socket.on('hostNextQuestion', hostNextQuestion);
+    socket.on('hostReplay', hostReplay);
 
 
     socket.on('playerJoinGame', playerJoinGame);
@@ -45,6 +46,8 @@ function hostPrepareGame(gameId) {
         gameId : gameId
     };
 
+    io.sockets.in(data.gameId).emit('waitingAPI', data);
+
     var request = require('request');
     request('https://cobe-api.cfapps.io/questions', function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -60,11 +63,15 @@ function hostStartGame(gameId) {
 };
 
 function hostNextQuestion(data) {
-    if (data.numQuestion < 10){
+    if (data.numQuestion < 1){
         sendQuestions(data.numQuestion, data.gameId);
     } else {
         io.sockets.in(data.gameId).emit('endGame',data);
     }
+}
+
+function hostReplay(gameId) {
+    hostPrepareGame(gameId);
 }
 
 /* ################################ */

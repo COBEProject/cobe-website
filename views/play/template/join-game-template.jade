@@ -1,12 +1,13 @@
 #join-game
-    .info
-        label(for='inputPlayerName') Votre pseudo
-        br
-        input#inputPlayerName(type='text')
-    .info
-        label(for='inputGameId') Code de la partie
-        br
-        input#inputGameId(type='text')
-    .info.buttons
-        button#btnStartJoinGame.btn Commencer
-        #playerWaitingMessage
+    #playerInformations
+        .info
+            label(for='inputPlayerName') Votre pseudo
+            br
+            input#inputPlayerName(type='text')
+        .info
+            label(for='inputGameId') Code de la partie
+            br
+            input#inputGameId(type='text')
+        .info.buttons
+            button#btnStartJoinGame.btn Commencer
+    #playerWaitingMessage

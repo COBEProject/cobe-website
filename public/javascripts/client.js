@@ -5,7 +5,7 @@ jQuery(function($){
     var IO = {
 
         /**
-         * Fonction d'initialisation appelé sur la page /play
+         *
          */
         init: function() {
             IO.socket = io.connect();
@@ -21,6 +21,8 @@ jQuery(function($){
             IO.socket.on('newQuestionData', IO.onNewQuestionData);
             IO.socket.on('hostCheckAnswer', IO.hostCheckAnswer);
             IO.socket.on('endGame', IO.endGame);
+
+            IO.socket.on('waitingAPI', IO.onWaitingAPI);
 
             IO.socket.on('appError', IO.error );
 
@@ -56,8 +58,14 @@ jQuery(function($){
             }
         },
 
-        endGame : function(data) {
+        endGame : function (data) {
             App[App.myRole].endGame(data);
+        },
+
+        onWaitingAPI : function (data) {
+            if(App.myRole === 'Host') {
+                App.Host.waitingAPI(data);
+            }
         },
 
         error : function(data) {
@@ -98,6 +106,7 @@ jQuery(function($){
             // HOST
             App.$doc.on('click', '#btnCreateGame', App.Host.onCreateClick);
             App.$doc.on('click', '#btnStartGame', App.Host.onHostStartClick);
+            App.$doc.on('click', '#btnReplay', App.Host.onReplay);
 
             // PLAYER
             App.$doc.on('click', '#btnJoinGame', App.Player.onJoinClick);
@@ -134,6 +143,10 @@ jQuery(function($){
                 IO.socket.emit('hostStartGame', App.gameId);
             },
 
+            onReplay: function () {
+                IO.socket.emit('hostReplay', App.gameId);
+            },
+
             /* Initialisation de la partie */
             gameInit: function (data) {
                 App.gameId                  = data.gameId;
@@ -144,7 +157,7 @@ jQuery(function($){
                 App.Host.displayNewGameScreen();
             },
 
-            displayNewGameScreen : function() {
+            displayNewGameScreen : function () {
 
                 App.$gameArea.html(App.$templateNewGame);
 
@@ -152,7 +165,7 @@ jQuery(function($){
                 $('#spanNewGameCode').text(App.gameId);
             },
 
-            updateWaitingScreen: function(data) {
+            updateWaitingScreen: function (data) {
                 // If this is a restarted game, show the screen.
                 if (App.Host.isNewGame) {
                     App.Host.displayNewGameScreen();
@@ -176,7 +189,9 @@ jQuery(function($){
                 }
             },
 
-            gameCountdown : function() {
+            gameCountdown : function () {
+
+                $('#overlay-spinner').hide();
 
                 App.$gameArea.html(App.$templateHostGame);
 
@@ -199,7 +214,7 @@ jQuery(function($){
 
             },
 
-            newQuestion : function(data) {
+            newQuestion : function (data) {
                 $('#hostQuestion').text(data.question);
 
                 App.currentQuestion             = data.numQuestion;
@@ -207,7 +222,7 @@ jQuery(function($){
                 App.Host.currentQuestionNbPlayersAnswered = 0;
             },
 
-            checkAnswer : function(data) {
+            checkAnswer : function (data) {
 
                 if (data.currentQuestion === App.currentQuestion) {
 
@@ -219,9 +234,6 @@ jQuery(function($){
                     if( App.Host.currentCorrectAnswer === data.answer ) {
                         $pScore.text( +$pScore.text() + 5 );
                     }
-
-                    // console.log();
-                    // console.log(App.Host.numPlayersInRoom);
 
                     if (App.Host.currentQuestionNbPlayersAnswered === App.Host.numPlayersInRoom) {
 
@@ -237,24 +249,22 @@ jQuery(function($){
                 }
             },
 
-            endGame : function(data) {
-                // Get the data for player 1 from the host screen
-
-                // Get the data for player 2 from the host screen
-
-                // Find the winner based on the scores
-
-                // Display the winner (or tie game message)
+            endGame : function (data) {
 
                 $('#hostQuestion').text('Partie terminée');
+                $('#playArea').append('<button class="btn" id="btnReplay">Rejouer</button>');
 
                 // Reset game data
+                App.Host.currentCorrectAnswer = '' ;
                 App.Host.currentQuestionNbPlayersAnswered = 0;
-                App.Host.numPlayersInRoom = 0;
                 App.Host.isNewGame = true;
 
-                // IO.socket.emit('hostNextRound',data);
             },
+
+            waitingAPI : function (data) {
+                console.log('here');
+                $('#overlay-spinner').show();
+            }
         },
 
         /* ################################ */
@@ -302,9 +312,11 @@ jQuery(function($){
                     App.myRole = 'Player';
                     App.gameId = data.gameId;
 
+                    $('#playerInformations').hide();
+
                     $('#playerWaitingMessage')
                         .append('<p/>')
-                        .text('Joined Game ' + data.gameId + '. Please wait for game to begin.');
+                        .text('Partie : ' + data.gameId + ' rejointe. Merci de patienter pendant que les autres joueurs rejoignent.');
                 }
             },
 

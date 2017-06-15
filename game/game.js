@@ -2,75 +2,112 @@ var io;
 var socket;
 
 /**
- * Initialisation de l'instance de jeu.
- * Appelé par app.js
+ * Initialisation de SocketIO
  *
  * @param sIo
  * @param sSocket
  */
-exports.init = function(sIo, sSocket) {
+exports.init = function(sIo, sSocket)
+{
     io      = sIo;
     socket  = sSocket;
 
-    socket.emit('connected', {'message': 'You are connected.'});
+    socket.emit('connected');
 
+    /* Message envoyé par l'HOST. */
     socket.on('hostCreateNewGame', hostCreateNewGame);
     socket.on('hostStartGame', hostPrepareGame);
     socket.on('hostCountdownFinished', hostStartGame);
     socket.on('hostNextQuestion', hostNextQuestion);
     socket.on('hostReplay', hostReplay);
 
-
+    /* Message envoyé par le PLAYER */
     socket.on('playerJoinGame', playerJoinGame);
     socket.on('playerAnswer', playerAnswer);
+
+    /* Message envoyé pour l'API */
+    socket.on('saveGameAPI', saveGameAPI);
 };
 
 /* ################################ */
 /* ###         HOST CODE        ### */
 /* ################################ */
 
-function hostCreateNewGame() {
-    // Create a unique Socket.IO Room
-    var thisGameId = ( Math.random() * 100000 ) | 0;
+/**
+ * Création de la partie.
+ * Génération d'un CODE partie.
+ */
+function hostCreateNewGame()
+{
+    var gameId = (Math.random() * 100000) | 0;
 
-    // Return the Room ID (gameId) and the socket ID (mySocketId) to the browser client
-    this.emit('newGameCreated', {gameId: thisGameId, mySocketId: this.id});
-
-    // Join the Room and wait for the players
-    this.join(thisGameId.toString());
-}
-
-function hostPrepareGame(gameId) {
     var data = {
-        mySocketId : this.id,
-        gameId : gameId
+        gameId: gameId,
+        mySocketId: this.id
     };
 
+    this.emit('newGameCreated', data);
+    this.join(gameId.toString());
+}
+
+/**
+ * Préparation de la partie.
+ *
+ * @param gameId
+ */
+function hostPrepareGame(gameId)
+{
+    var data = {
+        gameId : gameId,
+        mySocketId : this.id
+    };
+
+    // Mise en attente de l'HOST.
     io.sockets.in(data.gameId).emit('waitingAPI', data);
 
+    // Récupération des questions.
     var request = require('request');
     request('https://cobe-api.cfapps.io/questions', function (error, response, body) {
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
+            // Mélange des questions.
             questions = shuffle(JSON.parse(body));
             io.sockets.in(data.gameId).emit('beginNewGame', data);
         }
-    })
-
+    });
 }
 
-function hostStartGame(gameId) {
-    sendQuestions(0, gameId);
-};
+/**
+ * Démarrage de la partie.
+ *
+ * @param gameId
+ */
+function hostStartGame(gameId)
+{
+    sendQuestion(0, gameId);
+}
 
-function hostNextQuestion(data) {
-    if (data.numQuestion < 1){
-        sendQuestions(data.numQuestion, data.gameId);
+/**
+ * Chargement de la prochaine question.
+ *
+ * @param data
+ */
+function hostNextQuestion(data)
+{
+    // Une partie = 5 questions.
+    if (data.numQuestion < 5) {
+        sendQuestion(data.numQuestion, data.gameId);
     } else {
         io.sockets.in(data.gameId).emit('endGame',data);
     }
 }
 
-function hostReplay(gameId) {
+/**
+ * Redémarrage de la partie.
+ *
+ * @param gameId
+ */
+function hostReplay(gameId)
+{
     hostPrepareGame(gameId);
 }
 
@@ -78,12 +115,16 @@ function hostReplay(gameId) {
 /* ###        PLAYER CODE       ### */
 /* ################################ */
 
-function playerJoinGame(data) {
-    // Look up the room ID in the Socket.IO manager object.
+/**
+ * Rejoindre une partie.
+ *
+ * @param data
+ */
+function playerJoinGame(data)
+{
     var room = socket.adapter.rooms[data.gameId];
 
-    // If the room exists...
-    if( room != undefined ){
+    if( room !== undefined ){
         // attach the socket id to the data object.
         data.mySocketId = this.id;
 
@@ -104,7 +145,7 @@ function playerAnswer(data) {
 /* ###        GAME LOGIC        ### */
 /* ################################ */
 
-function sendQuestions(numQuestion, gameId) {
+function sendQuestion(numQuestion, gameId) {
     var data = getQuestionData(numQuestion);
     io.sockets.in(gameId).emit('newQuestionData', data);
 }
@@ -141,3 +182,26 @@ function shuffle(array) {
 }
 
 var questions = [];
+
+/* ################################ */
+/* ###          API CODE        ### */
+/* ################################ */
+
+
+function saveGameAPI (data)
+{
+    console.log(data.nbPlayer);
+
+    var options = {
+        url: 'https://cobe-api.cfapps.io/game',
+        method: 'POST',
+        form: { 'nb_player': data.nbPlayer, 'name': data.name }
+    };
+
+    var request = require('request');
+    request(options , function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    })
+}

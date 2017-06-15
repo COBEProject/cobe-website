@@ -28,7 +28,7 @@ jQuery(function($){
 
         },
 
-        onConnected : function(data) {
+        onConnected : function() {
             App.mySocketId = IO.socket.io.engine.id;
         },
 
@@ -259,10 +259,15 @@ jQuery(function($){
                 App.Host.currentQuestionNbPlayersAnswered = 0;
                 App.Host.isNewGame = true;
 
+                var data = {
+                    name: App.gameId,
+                    nbPlayer : App.Host.numPlayersInRoom
+                };
+
+                IO.socket.emit('saveGameAPI', data);
             },
 
             waitingAPI : function (data) {
-                console.log('here');
                 $('#overlay-spinner').show();
             }
         },
